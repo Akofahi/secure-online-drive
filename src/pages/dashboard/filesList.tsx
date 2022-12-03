@@ -24,11 +24,7 @@ function FilesList() {
         if (!user) {
             navigate('/auth/login')
         } else {
-            getUserFiles(user.uid).then(data => {
-                console.log('getUserFiles', data);
-                
-                setFiles(data);
-            })
+           updateList()
         }
     }, [user])
 
@@ -79,6 +75,7 @@ function FilesList() {
                 <thead>
                     <tr>
                         <th>File Name</th>
+                        <th>Type</th>
                         <th>Size</th>
                         <th>Upload Date</th>
                         <th>Actions</th>
@@ -89,6 +86,7 @@ function FilesList() {
                         files?.map((x) => (
                             <tr key={x.id}>
                                 <td style={{ textAlign: 'start' }}>{x.file.name}</td>
+                                <td style={{ textAlign: 'start' }}>{x.file.type}</td>
                                 <td style={{ textAlign: 'start' }}>{x.file.size}</td>
                                 <td style={{ textAlign: 'start' }}>{x.file.uploadDate}</td>
                                 <td style={{ textAlign: 'start' }}>{'actions'}</td>
@@ -126,7 +124,17 @@ function FilesList() {
             });
         }
 
+        updateList();
+        
         setIsLoading(false);
+    }
+
+    function updateList() {
+        getUserFiles(user.uid).then(data => {
+            console.log('getUserFiles', data);
+            
+            setFiles(data);
+        })
     }
 }
 

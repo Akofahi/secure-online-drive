@@ -16,6 +16,8 @@ export async function getUserFiles(userId: string) {
 export async function uploadFile(userId: string, file: File) {
     const usersStorageRef = storageRef(storage, `files/${userId}`);
 
+    console.log('uploading file', file);
+    
     const {
         metadata: { name, fullPath },
         ref,
@@ -24,7 +26,10 @@ export async function uploadFile(userId: string, file: File) {
     const downloadURL = await getDownloadURL(ref);
 
     return {
-        name,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploadDate: new Date().toISOString(),
         fullPath,
         src: downloadURL,
     };
@@ -33,6 +38,9 @@ export async function uploadFile(userId: string, file: File) {
 export async function addUserFile(data: {
     userId: string; file: {
         name: string;
+        size: number;
+        type: string;
+        uploadDate: Date;
         fullPath: string;
         src: string;
     };
