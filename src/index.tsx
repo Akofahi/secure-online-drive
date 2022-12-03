@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { MantineProvider, ColorSchemeProvider, ColorScheme, } from '@mantine/core';
 import { BrowserRouter } from "react-router-dom";
 import { useLocalStorage } from '@mantine/hooks';
+import { NotificationsProvider } from '@mantine/notifications';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -32,7 +33,9 @@ function _APP() {
             'brand': ['#7AD1DD', '#5FCCDB', '#44CADC', '#2AC9DE', '#1AC2D9', '#11B7CD', '#09ADC3', '#0E99AC', '#128797', '#147885'],
           },
         }}>
-          <App />
+          <NotificationsProvider>
+            <App />
+          </NotificationsProvider>
         </MantineProvider>
       </ColorSchemeProvider>
 
