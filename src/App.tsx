@@ -13,7 +13,7 @@ function App() {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
         <Route index element={<FilesList />} />
-        <Route path="*" element={<h1>Not found</h1>} />
+        <Route path="*" element={<FilesList />} />
       </Routes>
     </div>
   );
