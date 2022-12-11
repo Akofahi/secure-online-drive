@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/secure-online-drive/static/css/main.073c9b0a.css",
+    "main.js": "/secure-online-drive/static/js/main.2dd4acb9.js",
+    "static/js/787.7bd6a61d.chunk.js": "/secure-online-drive/static/js/787.7bd6a61d.chunk.js",
+    "index.html": "/secure-online-drive/index.html",
+    "main.073c9b0a.css.map": "/secure-online-drive/static/css/main.073c9b0a.css.map",
+    "main.2dd4acb9.js.map": "/secure-online-drive/static/js/main.2dd4acb9.js.map",
+    "787.7bd6a61d.chunk.js.map": "/secure-online-drive/static/js/787.7bd6a61d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.073c9b0a.css",
+    "static/js/main.2dd4acb9.js"
+  ]
+}
