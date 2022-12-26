@@ -7,21 +7,36 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import HeaderFooterLayout from '../../layouts/header-footer-layout';
 import { Dropzone } from '@mantine/dropzone';
-import { Group, useMantineTheme, Text, Table, ActionIcon, Input } from '@mantine/core';
-import { IconUpload, IconPhoto, IconX, IconDownload, IconTrash, IconPassword } from '@tabler/icons';
+import { Group, useMantineTheme, Text, Table, ActionIcon, Input, Grid, Space, Modal, TextInput, Button } from '@mantine/core';
+import { IconUpload, IconPhoto, IconX, IconDownload, IconTrash, IconPassword, IconKey, IconEye, IconEyeOff, IconSearch } from '@tabler/icons';
 import { addUserFile, deleteUserFile, getFileBlob, getUserFiles, removeUserFile, uploadFile } from '../../services/users-service';
 import { showNotification } from '@mantine/notifications';
 import CryptoJS from 'crypto-js';
 import e from 'express';
+import { FlexCol, FlexRow } from '../../ui';
 
 function FilesList() {
     const [user, userIsLoading, userError] = useAuthState(auth);
     const [isLoading, setIsLoading] = useState(false);
-    const [key,setKey ] = useState("");
     const [files, setFiles] = useState([]);
     const { responsive } = useResponsive();
     const navigate = useNavigate();
     const theme = useMantineTheme();
+
+    const [filterText, setFilterText] = useState("");
+
+    const [encKey, setEncKey] = useState("");
+    const [decKey, setDecKey] = useState("");
+
+    const [encKeyTemp, setEncKeyTemp] = useState("");
+    const [decKeyTemp, setDecKeyTemp] = useState("");
+
+    const [encKeyBlured, setEncKeyBlured] = useState(true);
+    const [decKeyBlured, setDecKeyBlured] = useState(true);
+
+    const [openedEncKey, setOpenedEncKey] = useState(false);
+    const [openedDecKey, setOpenedDecKey] = useState(false);
+
 
     useEffect(() => {
         if (!user) {
@@ -31,12 +46,103 @@ function FilesList() {
         }
     }, [user])
 
+    const bluredCss = {
+        color: 'transparent',
+        textShadow: ' 0 0 7px rgba(0,0,0,0.9)'
+    }
 
     return (
         <HeaderFooterLayout>
 
+            {/* keys */}
+
+            <Grid columns={2}>
+                <Grid.Col lg={1}>
+                    <FlexCol>
+
+                        <FlexRow justify='center'>
+                            Encryption Key
+                            <Space w={20} />
+                            <ActionIcon onClick={() => setOpenedEncKey(true)}>
+                                <IconKey />
+                            </ActionIcon>
+                        </FlexRow>
+
+                        <FlexRow justify='center'>
+                            {encKey && <>
+                                <Text sx={encKeyBlured ? bluredCss : {}}>{encKey}</Text>
+                                <Space w={20} />
+                                {!encKeyBlured && <ActionIcon onClick={() => setEncKeyBlured(true)}>
+                                    <IconEyeOff />
+                                </ActionIcon>}
+                                {encKeyBlured && <ActionIcon onClick={() => setEncKeyBlured(false)}>
+                                    <IconEye />
+                                </ActionIcon>}
+                                <ActionIcon onClick={() => setEncKey('')}>
+                                    <IconTrash />
+                                </ActionIcon>
+                            </>}
+                        </FlexRow>
+                    </FlexCol>
+                </Grid.Col>
+                <Grid.Col lg={1}>
+                    <FlexCol>
+                        <FlexRow justify='center'>
+                            Decryption Key
+                            <Space w={20} />
+                            <ActionIcon onClick={() => setOpenedDecKey(true)}>
+                                <IconKey />
+                            </ActionIcon>
+                        </FlexRow>
+
+
+                        <FlexRow justify='center'>
+
+                            {decKey && <>
+                                <Text sx={decKeyBlured ? bluredCss : {}}>{decKey}</Text>
+                                <Space w={20} />
+                                {!decKeyBlured && <ActionIcon onClick={() => setDecKeyBlured(true)}>
+                                    <IconEyeOff />
+                                </ActionIcon>}
+                                {decKeyBlured && <ActionIcon onClick={() => setDecKeyBlured(false)}>
+                                    <IconEye />
+                                </ActionIcon>}
+                                <ActionIcon onClick={() => setDecKey('')}>
+                                    <IconTrash />
+                                </ActionIcon>
+                            </>}
+
+                        </FlexRow>
+                    </FlexCol>
+                </Grid.Col>
+            </Grid>
+
+            {/* modals */}
+            <Modal
+                opened={openedEncKey}
+                onClose={() => setOpenedEncKey(false)}
+                title="Enter Encryption Key"
+            >
+                <FlexCol>
+                    <TextInput onChange={e => setEncKeyTemp(e.target.value)} />
+                    <Button sx={{ margin: '1rem auto' }} onClick={() => { setEncKey(encKeyTemp); setOpenedEncKey(false) }}>Save</Button>
+                </FlexCol>
+            </Modal>
+
+            <Modal
+                opened={openedDecKey}
+                onClose={() => setOpenedDecKey(false)}
+                title="Enter Decryption Key"
+            >
+                <FlexCol>
+                    <TextInput onChange={e => setDecKeyTemp(e.target.value)} />
+                    <Button sx={{ margin: '1rem auto' }} onClick={() => { setDecKey(decKeyTemp); setOpenedDecKey(false) }}>Save</Button>
+                </FlexCol>
+            </Modal>
+
             {/* upload files */}
             <Dropzone
+                sx={{ marginTop: 50 }}
                 loading={isLoading}
                 onDrop={(files) => handleDrop(files)}
                 onReject={(files) => console.log('rejected files', files)}
@@ -72,10 +178,12 @@ function FilesList() {
                 </Group>
             </Dropzone>
 
-            {/* files list */}
-            <div style={{display:"flex",justifyContent:"center" ,alignItems:"center",marginTop:"100px" ,flexDirection:"column"}}>  <label htmlFor="Input" >Encryption key</label><Input sx={{  maxWidth: "300px" ,}}  type="password" onChange={e => keychangehandler(e.target.value)} /></div>
-            
-            <Table sx={{ marginTop: 100 }}>
+            <Space h={100}></Space>
+            <TextInput placeholder='Type to search...' icon={<IconSearch size={16} />} onChange={e => setFilterText(e.target.value)} />
+            <Space h={50}></Space>
+
+
+            <Table>
                 <thead>
                     <tr>
                         <th>File Name</th>
@@ -86,14 +194,16 @@ function FilesList() {
                 </thead>
                 <tbody>
                     {
-                        files?.map((x) => (
+                        files?.filter(x =>
+                            !filterText || (x.file.name as string).toLowerCase().includes(filterText.toLowerCase())
+                        ).map((x) => (
                             <tr key={x.id}>
                                 <td style={{ textAlign: 'start' }}>{x.file.name}</td>
                                 <td style={{ textAlign: 'start' }}>{x.file.size}</td>
                                 <td style={{ textAlign: 'start' }}>{x.file.uploadDate}</td>
                                 <td style={{ textAlign: 'start' }}>
                                     <div style={{ display: 'flex' }}>
-                                
+
                                         <ActionIcon onClick={() => downloadFile(x.file)}>
                                             <IconDownload size={18} />
                                         </ActionIcon>
@@ -141,15 +251,12 @@ function FilesList() {
         setIsLoading(false);
     }
 
-    function keychangehandler(text){
-        setKey(text)
-    }
 
     async function downloadFile(file) {
         const blob = await getFileBlob(file.fullPath);
         const _file = new File([blob], file.name);
         decryptAndDownload(_file);
-       
+
     }
 
     async function _downloadFile(file) {
@@ -181,13 +288,13 @@ function FilesList() {
         return new Promise((resolve, reject) => {
             var reader = new FileReader();
             reader.onload = () => {
-                
-                var wordArray = CryptoJS.lib.WordArray.create(reader.result as any);           
-                var encrypted = CryptoJS.AES.encrypt(wordArray, key).toString();        
 
-                var fileEnc = new Blob([encrypted]);                                    
+                var wordArray = CryptoJS.lib.WordArray.create(reader.result as any);
+                var encrypted = CryptoJS.AES.encrypt(wordArray, encKey).toString();
 
-                uploadFile(user.uid,key? fileEnc:file, file.name).then(x => {
+                var fileEnc = new Blob([encrypted]);
+
+                uploadFile(user.uid, encKey ? fileEnc : file, file.name).then(x => {
                     resolve(x);
                 }).catch(err => reject(err));
 
@@ -214,15 +321,15 @@ function FilesList() {
         return new Promise((resolve, reject) => {
             var reader = new FileReader();
             reader.onload = () => {
-                
 
-                var decrypted = CryptoJS.AES.decrypt(reader.result as any, key);            
-                var typedArray = convertWordArrayToUint8Array(decrypted);               
 
-                var fileDec = new Blob([typedArray]);                                   
+                var decrypted = CryptoJS.AES.decrypt(reader.result as any, decKey);
+                var typedArray = convertWordArrayToUint8Array(decrypted);
+
+                var fileDec = new Blob([typedArray]);
 
                 var a = document.createElement("a");
-                var url = window.URL.createObjectURL(fileDec);
+                var url = window.URL.createObjectURL(decKey ? fileDec : file);
                 var filename = file.name;
                 a.href = url;
                 a.download = filename;
