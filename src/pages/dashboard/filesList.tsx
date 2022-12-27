@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import HeaderFooterLayout from '../../layouts/header-footer-layout';
 import { Dropzone } from '@mantine/dropzone';
-import { Group, useMantineTheme, Text, Table, ActionIcon, Input, Grid, Space, Modal, TextInput, Button, PasswordInput } from '@mantine/core';
+import { Group, useMantineTheme, Text, Table, ActionIcon, Input, Grid, Space, Modal, TextInput, Button, PasswordInput, CopyButton } from '@mantine/core';
 import { IconUpload, IconPhoto, IconX, IconDownload, IconTrash, IconPassword, IconKey, IconEye, IconEyeOff, IconSearch } from '@tabler/icons';
 import { addUserFile, deleteUserFile, getFileBlob, getUserFiles, removeUserFile, uploadFile } from '../../services/users-service';
 import { showNotification } from '@mantine/notifications';
@@ -72,13 +72,20 @@ function FilesList() {
                             {encKey && <>
                                 <Text sx={encKeyBlured ? bluredCss : {}}>{encKey}</Text>
                                 <Space w={20} />
+                                <CopyButton value={encKey}>
+                                    {({ copied, copy }) => (
+                                        <Button variant={'white'} color={copied ? 'teal' : 'blue'} onClick={copy}>
+                                            {copied ? 'Copied' : 'Copy key'}
+                                        </Button>
+                                    )}
+                                </CopyButton>
                                 {!encKeyBlured && <ActionIcon onClick={() => setEncKeyBlured(true)}>
                                     <IconEyeOff />
                                 </ActionIcon>}
                                 {encKeyBlured && <ActionIcon onClick={() => setEncKeyBlured(false)}>
                                     <IconEye />
                                 </ActionIcon>}
-                                <ActionIcon onClick={() => {setEncKey(''); setEncKeyTemp('')}}>
+                                <ActionIcon onClick={() => { setEncKey(''); setEncKeyTemp('') }}>
                                     <IconTrash />
                                 </ActionIcon>
                             </>}
@@ -101,6 +108,13 @@ function FilesList() {
                             {decKey && <>
                                 <Text sx={decKeyBlured ? bluredCss : {}}>{decKey}</Text>
                                 <Space w={20} />
+                                <CopyButton value={decKey}>
+                                    {({ copied, copy }) => (
+                                        <Button variant={'white'} color={copied ? 'teal' : 'blue'} onClick={copy}>
+                                            {copied ? 'Copied' : 'Copy key'}
+                                        </Button>
+                                    )}
+                                </CopyButton>
                                 {!decKeyBlured && <ActionIcon onClick={() => setDecKeyBlured(true)}>
                                     <IconEyeOff />
                                 </ActionIcon>}
@@ -126,11 +140,11 @@ function FilesList() {
                 <FlexCol>
                     <PasswordInput sx={{ flex: 1 }} onChange={e => setEncKeyTemp(e.target.value)} />
                     <Space w={10} />
-                        <Button sx={{ margin: '1rem auto' }} onClick={() => { setEncKey(encKeyTemp); setOpenedEncKey(false) }}>Save</Button>
-                        <Button variant='white' onClick={() => {
-                            setEncKey(generateKey());
-                            setOpenedEncKey(false);
-                        }}>Generate random key</Button>
+                    <Button sx={{ margin: '1rem auto' }} onClick={() => { setEncKey(encKeyTemp); setOpenedEncKey(false) }}>Save</Button>
+                    <Button variant='white' onClick={() => {
+                        setEncKey(generateKey());
+                        setOpenedEncKey(false);
+                    }}>Generate random key</Button>
                 </FlexCol>
             </Modal>
 
