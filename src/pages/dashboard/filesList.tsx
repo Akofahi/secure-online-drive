@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import HeaderFooterLayout from '../../layouts/header-footer-layout';
 import { Dropzone } from '@mantine/dropzone';
-import { Group, useMantineTheme, Text, Table, ActionIcon, Input, Grid, Space, Modal, TextInput, Button } from '@mantine/core';
+import { Group, useMantineTheme, Text, Table, ActionIcon, Input, Grid, Space, Modal, TextInput, Button, PasswordInput } from '@mantine/core';
 import { IconUpload, IconPhoto, IconX, IconDownload, IconTrash, IconPassword, IconKey, IconEye, IconEyeOff, IconSearch } from '@tabler/icons';
 import { addUserFile, deleteUserFile, getFileBlob, getUserFiles, removeUserFile, uploadFile } from '../../services/users-service';
 import { showNotification } from '@mantine/notifications';
@@ -78,7 +78,7 @@ function FilesList() {
                                 {encKeyBlured && <ActionIcon onClick={() => setEncKeyBlured(false)}>
                                     <IconEye />
                                 </ActionIcon>}
-                                <ActionIcon onClick={() => setEncKey('')}>
+                                <ActionIcon onClick={() => {setEncKey(''); setEncKeyTemp('')}}>
                                     <IconTrash />
                                 </ActionIcon>
                             </>}
@@ -107,7 +107,7 @@ function FilesList() {
                                 {decKeyBlured && <ActionIcon onClick={() => setDecKeyBlured(false)}>
                                     <IconEye />
                                 </ActionIcon>}
-                                <ActionIcon onClick={() => setDecKey('')}>
+                                <ActionIcon onClick={() => { setDecKey(''); setDecKeyTemp('') }}>
                                     <IconTrash />
                                 </ActionIcon>
                             </>}
@@ -124,8 +124,13 @@ function FilesList() {
                 title="Enter Encryption Key"
             >
                 <FlexCol>
-                    <TextInput onChange={e => setEncKeyTemp(e.target.value)} />
-                    <Button sx={{ margin: '1rem auto' }} onClick={() => { setEncKey(encKeyTemp); setOpenedEncKey(false) }}>Save</Button>
+                    <PasswordInput sx={{ flex: 1 }} onChange={e => setEncKeyTemp(e.target.value)} />
+                    <Space w={10} />
+                        <Button sx={{ margin: '1rem auto' }} onClick={() => { setEncKey(encKeyTemp); setOpenedEncKey(false) }}>Save</Button>
+                        <Button variant='white' onClick={() => {
+                            setEncKey(generateKey());
+                            setOpenedEncKey(false);
+                        }}>Generate random key</Button>
                 </FlexCol>
             </Modal>
 
@@ -135,7 +140,10 @@ function FilesList() {
                 title="Enter Decryption Key"
             >
                 <FlexCol>
-                    <TextInput onChange={e => setDecKeyTemp(e.target.value)} />
+                    <FlexRow>
+                        <PasswordInput sx={{ flex: 1 }} onChange={e => setDecKeyTemp(e.target.value)} />
+                        <Space w={10} />
+                    </FlexRow>
                     <Button sx={{ margin: '1rem auto' }} onClick={() => { setDecKey(decKeyTemp); setOpenedDecKey(false) }}>Save</Button>
                 </FlexCol>
             </Modal>
@@ -203,7 +211,6 @@ function FilesList() {
                                 <td style={{ textAlign: 'start' }}>{x.file.uploadDate}</td>
                                 <td style={{ textAlign: 'start' }}>
                                     <div style={{ display: 'flex' }}>
-
                                         <ActionIcon onClick={() => downloadFile(x.file)}>
                                             <IconDownload size={18} />
                                         </ActionIcon>
@@ -338,6 +345,16 @@ function FilesList() {
             };
             reader.readAsText(file);
         })
+    }
+
+    function generateKey() {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < 64; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
     }
 }
 
