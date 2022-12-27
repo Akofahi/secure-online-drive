@@ -70,7 +70,7 @@ function FilesList() {
 
                         <FlexRow justify='center'>
                             {encKey && <>
-                                <Text sx={encKeyBlured ? bluredCss : {}}>{encKey}</Text>
+                                <Text sx={encKeyBlured ? bluredCss : {} } style={{fontSize: "70%"}}>{encKey}</Text>
                                 <Space w={20} />
                                 <CopyButton value={encKey}>
                                     {({ copied, copy }) => (
